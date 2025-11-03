@@ -1,0 +1,21 @@
+def call(String imageName, String credentialsId = 'dockerHub') {
+    echo "Pushing Docker image to Docker Hub..."
+
+    withCredentials([usernamePassword(credentialsId: credentialsId, passwordVariable: 'dockerPass', usernameVariable: 'dockerUser')]) {
+        sh '''
+            echo "Logging into Docker Hub..."
+            docker login -u $dockerUser -p $dockerPass
+
+            echo "Tagging image..."
+            docker image tag ${imageName}:latest $dockerUser/${imageName}:latest
+
+            echo "Pushing image to Docker Hub..."
+            docker push $dockerUser/${imageName}:latest
+
+            echo "Cleaning up unused images..."
+            docker image prune -f
+        '''
+    }
+
+    echo "✅ Docker image pushed successfully!"
+}
